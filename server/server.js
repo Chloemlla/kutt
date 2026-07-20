@@ -5,6 +5,7 @@ const compression = require("compression");
 const responseTime = require("response-time");
 const passport = require("passport");
 const express = require("express");
+const session = require("cookie-session");
 const helmet = require("helmet");
 const cors = require("cors");
 const path = require("node:path");
@@ -63,7 +64,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    
+
     // In development, allow localhost on any port
     if (env.NODE_ENV !== 'production') {
       if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
@@ -73,13 +74,13 @@ const corsOptions = {
       console.warn(`CORS: Allowing unknown origin in development: ${origin}`);
       return callback(null, true);
     }
-    
+
     // Production: only allow the default domain
     const allowedOrigins = [
       `https://${env.DEFAULT_DOMAIN}`,
       `http://${env.DEFAULT_DOMAIN}`,
     ];
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -98,6 +99,15 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' })); // Limit request body size
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// use cookie sessions only when OIDC is enabled
+// because only OIDC is using it
+if (env.OIDC_ENABLED) {
+  app.use(session({
+    keys: [env.JWT_SECRET],
+    maxAge: 1000 * 60 * 60 * 24 * 7, // expire after seven days
+  }));
+}
 
 // serve static with caching and optimization
 const staticOptions = {
