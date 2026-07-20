@@ -7,7 +7,7 @@ on:
       - dev
     paths-ignore:
       - .github/**
-      - "!.github/workflows/docker-build-development"
+      - "!.github/workflows/docker-build-development.yaml"
       - "!.github/workflows/deploy_image.js"
   workflow_dispatch:
 
