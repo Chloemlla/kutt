@@ -41,7 +41,7 @@ module.exports = async function({ data }) {
 
     // Get geo location
     const geoData = geoip.lookup(data.ip);
-    const country = data.country || geoData?.country || "Unknown";
+    const country = (data.country || geoData?.country)?.slice(0, 2).toUpperCase() || "Unknown";
 
     // Parse UTM parameters from referrer
     let utmParams = {};
